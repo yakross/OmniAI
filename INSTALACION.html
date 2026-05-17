@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMNI-AI · Guía de Instalación</title>
+<link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;500;700;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f1a;
+  --card: #111827;
+  --card2: #161f30;
+  --border: rgba(99,179,237,0.15);
+  --blue: #63b3ed;
+  --teal: #4fd1c5;
+  --green: #68d391;
+  --orange: #f6ad55;
+  --red: #fc8181;
+  --text: #e2e8f0;
+  --muted: #718096;
+  --done: rgba(104,211,145,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* BG */
+body::before {
+  content:''; position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(99,179,237,0.05), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(79,209,197,0.04), transparent);
+  pointer-events:none;
+}
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+/* HEADER */
+header { padding: 64px 0 48px; text-align: center; }
+.logo {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-bottom: 32px;
+}
+.logo-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 0 32px rgba(99,179,237,0.3);
+}
+.logo-text { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
+.logo-text span { color: var(--blue); }
+
+h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 900; letter-spacing:-0.03em; line-height:1.1; margin-bottom:16px; }
+h1 em { color: var(--teal); font-style: normal; }
+.subtitle { font-size: 16px; color: var(--muted); line-height: 1.6; max-width: 560px; margin: 0 auto; }
+
+/* PROGRESS BAR */
+.progress-section { padding: 24px 0 40px; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px; color: var(--muted);
+  margin-bottom: 10px;
+}
+.progress-label span { color: var(--teal); }
+.bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.bar-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(99,179,237,0.5);
+}
+
+/* STEPS */
+.steps { display: flex; flex-direction: column; gap: 4px; padding-bottom: 80px; }
+
+.step {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: var(--card);
+}
+.step.active { border-color: rgba(99,179,237,0.4); background: var(--card2); }
+.step.completed { border-color: rgba(104,211,145,0.25); background: var(--done); }
+
+.step-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+.step-header:hover { background: rgba(255,255,255,0.02); }
+
+.step-num {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px; font-weight: 500;
+  border: 1.5px solid;
+  transition: all 0.3s;
+}
+.step:not(.active):not(.completed) .step-num {
+  color: var(--muted); border-color: rgba(255,255,255,0.1);
+}
+.step.active .step-num {
+  color: var(--blue); border-color: var(--blue);
+  box-shadow: 0 0 16px rgba(99,179,237,0.3);
+}
+.step.completed .step-num {
+  color: var(--green); border-color: var(--green);
+  background: rgba(104,211,145,0.1);
+}
+.check-icon { display: none; }
+.step.completed .step-num .num-text { display: none; }
+.step.completed .step-num .check-icon { display: block; }
+
+.step-meta { flex: 1; }
+.step-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+.step-desc { font-size: 13px; color: var(--muted); }
+.step-time {
+  font-family: 'Fira Code', monospace; font-size: 11px;
+  color: var(--muted); white-space: nowrap;
+  padding: 4px 10px; border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+}
+.step.active .step-time { color: var(--blue); }
+
+.chevron {
+  color: var(--muted); font-size: 18px;
+  transition: transform 0.3s;
+}
+.step.active .chevron { transform: rotate(90deg); color: var(--blue); }
+
+/* STEP BODY */
+.step-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.step.active .step-body { max-height: 2000px; }
+
+.step-content { padding: 0 24px 28px; border-top: 1px solid var(--border); margin-top: 0; padding-top: 24px; }
+
+/* CODE */
+.code-block {
+  background: #070d18;
+  border: 1px solid rgba(99,179,237,0.12);
+  border-radius: 6px;
+  padding: 20px;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-x: auto;
+  margin: 16px 0;
+  position: relative;
+}
+.copy-btn {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(99,179,237,0.12);
+  border: 1px solid rgba(99,179,237,0.2);
+  color: var(--blue); border-radius: 4px;
+  padding: 4px 10px; font-size: 11px;
+  cursor: pointer; font-family: 'Fira Code', monospace;
+  transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(99,179,237,0.2); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(104,211,145,0.1); }
+
+.c-$ { color: var(--muted); }
+.c-cmd { color: var(--blue); }
+.c-str { color: var(--green); }
+.c-cm { color: #3a506b; font-style: italic; }
+.c-kw { color: var(--orange); }
+.c-val { color: var(--teal); }
+
+/* TIPS */
+.tip {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; border-radius: 6px; margin: 12px 0;
+  font-size: 13px; line-height: 1.6;
+}
+.tip.info { background: rgba(99,179,237,0.07); border-left: 3px solid var(--blue); }
+.tip.success { background: rgba(104,211,145,0.07); border-left: 3px solid var(--green); }
+.tip.warning { background: rgba(246,173,85,0.07); border-left: 3px solid var(--orange); }
+.tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* LINK */
+a.link {
+  color: var(--blue); text-decoration: none;
+  border-bottom: 1px solid rgba(99,179,237,0.3);
+  transition: border-color 0.2s;
+}
+a.link:hover { border-color: var(--blue); }
+
+/* CHECKLIST */
+.checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.checklist li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  cursor: pointer; transition: all 0.2s;
+}
+.checklist li:hover { background: rgba(255,255,255,0.05); }
+.checklist li.done { background: rgba(104,211,145,0.06); border-color: rgba(104,211,145,0.2); color: var(--muted); text-decoration: line-through; }
+.check-box {
+  width: 20px; height: 20px; border-radius: 4px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all 0.2s;
+}
+.checklist li.done .check-box { background: var(--green); border-color: var(--green); color: #0a0f1a; }
+
+/* NEXT BTN */
+.next-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  border: none; border-radius: 6px;
+  color: #0a0f1a; font-family: 'Epilogue', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 20px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(99,179,237,0.25);
+}
+.next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99,179,237,0.35); }
+.next-btn:active { transform: translateY(0); }
+
+/* FINAL */
+.final-card {
+  background: linear-gradient(135deg, rgba(99,179,237,0.08), rgba(79,209,197,0.08));
+  border: 1px solid rgba(99,179,237,0.25);
+  border-radius: 12px; padding: 40px;
+  text-align: center; display: none;
+  margin-bottom: 48px;
+}
+.final-card.visible { display: block; }
+.final-card h2 { font-size: 32px; font-weight: 900; margin-bottom: 12px; }
+.final-card p { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
+.sample-commands {
+  text-align: left;
+  background: #070d18; border-radius: 8px; padding: 20px;
+  font-family: 'Fira Code', monospace; font-size: 13px; line-height: 2;
+  border: 1px solid rgba(99,179,237,0.1);
+}
+
+/* PLATFORM PILLS */
+.platform-tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.ptab {
+  padding: 6px 14px; border-radius: 4px; font-size: 12px;
+  cursor: pointer; font-family: 'Fira Code', monospace;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted); transition: all 0.2s;
+}
+.ptab.active { background: rgba(99,179,237,0.12); border-color: var(--blue); color: var(--blue); }
+.platform-content { display: none; }
+.platform-content.active { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div class="logo-text"><span>OMNI</span>-AI</div>
+    </div>
+    <h1>Instala tu IA en<br><em>menos de 15 minutos</em></h1>
+    <p class="subtitle">Guía paso a paso para principiantes. Sin GPU, sin servidor propio. Solo necesitas Python y conexión a internet.</p>
+  </header>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>Progreso de instalación</span>
+      <span id="progress-text">0 / 6 pasos</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+  </div>
+
+  <div class="steps" id="steps-container">
+
+    <!-- PASO 1 -->
+    <div class="step active" data-step="1">
+      <div class="step-header" onclick="toggleStep(1)">
+        <div class="step-num">
+          <span class="num-text">01</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">Instalar Python</div>
+          <div class="step-desc">El lenguaje que usa OMNI-AI</div>
+        </div>
+        <div class="step-time">~3 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <div class="tip info"><span class="tip-icon">💡</span><span>Si ya tienes Python 3.10 o superior instalado, puedes saltar este paso. Verifica con <code style="color:var(--blue)">python --version</code> en tu terminal.</span></div>
+
+          <div class="platform-tabs">
+            <div class="ptab active" onclick="switchTab('py', 'windows')">Windows</div>
+            <div class="ptab" onclick="switchTab('py', 'mac')">macOS</div>
+            <div class="ptab" onclick="switchTab('py', 'linux')">Linux</div>
+          </div>
+
+          <div class="platform-content active" id="py-windows">
+            <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">Descarga Python desde la web oficial:</p>
+            <div class="code-block">
+              <span class="c-cm"># 1. Descarga el instalador desde:</span><br>
+              <span class="c-val">https://python.org/downloads</span><br><br>
+              <span class="c-cm"># 2. IMPORTANTE: marca esta casilla al instalar:</span><br>
+              <span class="c-kw">☑ Add Python to PATH</span><br><br>
+              <span class="c-cm"># 3. Verifica en CMD o PowerShell:</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">python --version</span><br>
+              <span class="c-str">Python 3.12.x</span>
+            </div>
+          </div>
+          <div class="platform-content" id="py-mac">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this, 'brew install python@3.12')">copiar</button>
+              <span class="c-cm"># Instala Homebrew si no lo tienes:</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">/bin/bash -c "$(curl -fsSL https://brew.sh/install.sh)"</span><br><br>
+              <span class="c-cm"># Luego instala Python:</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">brew install python@3.12</span><br><br>
+              <span class="c-cm"># Verifica:</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">python3 --version</span>
+            </div>
+          </div>
+          <div class="platform-content" id="py-linux">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this, 'sudo apt update && sudo apt install python3.12 python3-pip python3-venv -y')">copiar</button>
+              <span class="c-$">$</span> <span class="c-cmd">sudo apt update && sudo apt install python3.12 python3-pip python3-venv -y</span>
+            </div>
+          </div>
+
+          <ul class="checklist" id="checklist-1">
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> Python instalado correctamente</li>
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> <code style="font-family:'Fira Code',monospace; font-size:12px">python --version</code> muestra 3.10 o superior</li>
+          </ul>
+          <button class="next-btn" onclick="completeStep(1)">✓ Listo, Python instalado →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="step" data-step="2">
+      <div class="step-header" onclick="toggleStep(2)">
+        <div class="step-num">
+          <span class="num-text">02</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">Descargar OMNI-AI</div>
+          <div class="step-desc">Obtener los archivos del proyecto</div>
+        </div>
+        <div class="step-time">~1 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <p style="font-size:14px; color:var(--muted); margin-bottom:16px;">Descarga y descomprime los archivos de OMNI-AI en una carpeta de tu elección:</p>
+
+          <div class="tip success"><span class="tip-icon">📦</span><span>Descargaste los archivos como <code style="color:var(--green)">omni-ai.zip</code>. Descomprímelos en una carpeta fácil de encontrar, como <code style="color:var(--green)">Documentos/omni-ai/</code></span></div>
+
+          <p style="font-size:14px; color:var(--muted); margin: 16px 0 12px;">Luego abre una terminal en esa carpeta:</p>
+
+          <div class="platform-tabs">
+            <div class="ptab active" onclick="switchTab('cd', 'windows')">Windows</div>
+            <div class="ptab" onclick="switchTab('cd', 'mac')">macOS / Linux</div>
+          </div>
+          <div class="platform-content active" id="cd-windows">
+            <div class="code-block">
+              <span class="c-cm"># En Windows: clic derecho en la carpeta → "Abrir en Terminal"</span><br>
+              <span class="c-cm"># O desde PowerShell:</span><br>
+              <span class="c-$">PS</span> <span class="c-cmd">cd C:\Users\TuNombre\Documentos\omni-ai</span>
+            </div>
+          </div>
+          <div class="platform-content" id="cd-mac">
+            <div class="code-block">
+              <span class="c-$">$</span> <span class="c-cmd">cd ~/Documentos/omni-ai</span>
+            </div>
+          </div>
+
+          <div class="tip info"><span class="tip-icon">📁</span><span>La carpeta debe contener: <code style="color:var(--blue)">main.py</code>, <code style="color:var(--blue)">requirements.txt</code>, y las carpetas <code style="color:var(--blue)">core/</code> y <code style="color:var(--blue)">config/</code></span></div>
+          <button class="next-btn" onclick="completeStep(2)">✓ Archivos listos →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="step" data-step="3">
+      <div class="step-header" onclick="toggleStep(3)">
+        <div class="step-num">
+          <span class="num-text">03</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">Crear entorno virtual</div>
+          <div class="step-desc">Aísla las dependencias del proyecto</div>
+        </div>
+        <div class="step-time">~2 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <div class="tip info"><span class="tip-icon">🧪</span><span>Un entorno virtual es una caja aislada para tu proyecto. Evita conflictos con otros programas de Python en tu computador. Siempre hazlo.</span></div>
+
+          <div class="platform-tabs">
+            <div class="ptab active" onclick="switchTab('venv', 'windows')">Windows</div>
+            <div class="ptab" onclick="switchTab('venv', 'mac')">macOS / Linux</div>
+          </div>
+          <div class="platform-content active" id="venv-windows">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this, 'python -m venv venv\nvenv\\Scripts\\activate')">copiar</button>
+              <span class="c-cm"># Crear el entorno virtual:</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">python -m venv venv</span><br><br>
+              <span class="c-cm"># Activarlo (debes hacer esto cada vez que abras la terminal):</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">venv\Scripts\activate</span><br><br>
+              <span class="c-cm"># Verás esto en tu terminal cuando esté activo:</span><br>
+              <span class="c-str">(venv) $</span>
+            </div>
+          </div>
+          <div class="platform-content" id="venv-mac">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this, 'python3 -m venv venv\nsource venv/bin/activate')">copiar</button>
+              <span class="c-$">$</span> <span class="c-cmd">python3 -m venv venv</span><br>
+              <span class="c-$">$</span> <span class="c-cmd">source venv/bin/activate</span><br><br>
+              <span class="c-cm"># Verás esto cuando esté activo:</span><br>
+              <span class="c-str">(venv) $</span>
+            </div>
+          </div>
+
+          <button class="next-btn" onclick="completeStep(3)">✓ Entorno virtual creado →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="step" data-step="4">
+      <div class="step-header" onclick="toggleStep(4)">
+        <div class="step-num">
+          <span class="num-text">04</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">Instalar dependencias</div>
+          <div class="step-desc">Todas las librerías de IA en un comando</div>
+        </div>
+        <div class="step-time">~5 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <p style="font-size:14px; color:var(--muted); margin-bottom:16px;">Con el entorno virtual activado, ejecuta:</p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this, 'pip install -r requirements.txt')">copiar</button>
+            <span class="c-$">(venv) $</span> <span class="c-cmd">pip install -r requirements.txt</span><br><br>
+            <span class="c-cm"># Esto instala automáticamente:</span><br>
+            <span class="c-cm"># ✓ groq          → LLM gratis ultra-rápido (LLaMA 3.3 70B)</span><br>
+            <span class="c-cm"># ✓ chromadb      → Base de datos vectorial local</span><br>
+            <span class="c-cm"># ✓ sentence-transformers → Embeddings locales</span><br>
+            <span class="c-cm"># ✓ beautifulsoup4 → Leer páginas web</span><br>
+            <span class="c-cm"># ✓ pypdf          → Leer PDFs</span><br>
+            <span class="c-cm"># ✓ python-dotenv  → Variables de entorno</span>
+          </div>
+
+          <div class="tip warning"><span class="tip-icon">⏳</span><span>La primera vez tarda 3-8 minutos porque descarga los modelos de embeddings (~90MB). Las siguientes veces es instantáneo.</span></div>
+
+          <div class="tip success"><span class="tip-icon">✅</span><span>Si ves <code style="color:var(--green)">Successfully installed...</code> al final, todo está bien.</span></div>
+
+          <button class="next-btn" onclick="completeStep(4)">✓ Dependencias instaladas →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 5 -->
+    <div class="step" data-step="5">
+      <div class="step-header" onclick="toggleStep(5)">
+        <div class="step-num">
+          <span class="num-text">05</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">Obtener tu API Key GRATIS</div>
+          <div class="step-desc">Groq: LLaMA 3.3 70B sin costo</div>
+        </div>
+        <div class="step-time">~3 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <div class="tip success"><span class="tip-icon">🎁</span><span><strong>100% GRATIS.</strong> Groq ofrece acceso gratuito a LLaMA 3.3 70B (el mejor modelo open source). Límite generoso: ~14,400 requests/día gratis. Sin tarjeta de crédito.</span></div>
+
+          <ul class="checklist" id="checklist-5">
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> Ir a <a href="https://console.groq.com" target="_blank" class="link">console.groq.com</a> y crear cuenta gratuita</li>
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> Ir a "API Keys" → "Create API Key"</li>
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> Copiar la clave (empieza con <code style="font-family:'Fira Code',monospace;font-size:12px;color:var(--blue)">gsk_</code>)</li>
+            <li onclick="toggleCheck(this)"><div class="check-box"></div> Pegar la clave en el archivo <code style="font-family:'Fira Code',monospace;font-size:12px">config/.env</code></li>
+          </ul>
+
+          <div class="code-block">
+            <span class="c-cm"># Abrir config/.env con cualquier editor de texto y poner:</span><br><br>
+            <span class="c-kw">GROQ_API_KEY</span>=<span class="c-str">gsk_TU_CLAVE_REAL_AQUI</span>
+          </div>
+
+          <div class="tip info"><span class="tip-icon">🔒</span><span>El archivo <code style="color:var(--blue)">config/.env</code> nunca sale de tu computador. Tu API key está segura.</span></div>
+
+          <button class="next-btn" onclick="completeStep(5)">✓ API Key configurada →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 6 -->
+    <div class="step" data-step="6">
+      <div class="step-header" onclick="toggleStep(6)">
+        <div class="step-num">
+          <span class="num-text">06</span>
+          <span class="check-icon">✓</span>
+        </div>
+        <div class="step-meta">
+          <div class="step-title">¡Iniciar OMNI-AI!</div>
+          <div class="step-desc">Tu primera conversación con la IA</div>
+        </div>
+        <div class="step-time">~1 min</div>
+        <div class="chevron">›</div>
+      </div>
+      <div class="step-body">
+        <div class="step-content">
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this, 'python main.py')">copiar</button>
+            <span class="c-$">(venv) $</span> <span class="c-cmd">python main.py</span><br><br>
+            <span class="c-cm"># Deberías ver:</span><br>
+            <span class="c-str">🧠 Iniciando OMNI-AI...</span><br>
+            <span class="c-str">✅ Sistema listo | Sesión: 20250421_103045</span><br>
+            <span class="c-str">📚 Base de conocimiento: 0 docs | 0 memorias | 0 auto-notas</span><br><br>
+            <span class="c-str">  Tú → </span><span class="c-cm">← aquí escribes</span>
+          </div>
+
+          <p style="font-size:14px; font-weight:700; margin: 20px 0 12px;">Prueba estos comandos de ejemplo:</p>
+          <div class="code-block">
+            <span class="c-cm"># Chatear normalmente:</span><br>
+            <span class="c-str">  Tú → </span>Hola, ¿qué puedes hacer?<br><br>
+            <span class="c-cm"># Aprender de una web:</span><br>
+            <span class="c-str">  Tú → </span>/aprender https://es.wikipedia.org/wiki/Inteligencia_artificial<br><br>
+            <span class="c-cm"># Aprender texto directo:</span><br>
+            <span class="c-str">  Tú → </span>/aprender Mi empresa se llama Nexus y vendemos software B2B<br><br>
+            <span class="c-cm"># Aprender un PDF:</span><br>
+            <span class="c-str">  Tú → </span>/aprender /ruta/al/documento.pdf<br><br>
+            <span class="c-cm"># Ver estado del sistema:</span><br>
+            <span class="c-str">  Tú → </span>/estado
+          </div>
+
+          <div class="tip success"><span class="tip-icon">🚀</span><span><strong>La IA aprende y recuerda entre sesiones.</strong> Cada vez que la abras, recordará todo lo que le enseñaste y todas las conversaciones anteriores.</span></div>
+
+          <button class="next-btn" onclick="completeStep(6)" style="background: linear-gradient(135deg, #68d391, #4fd1c5);">🎉 ¡Todo listo! Ver resumen final →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /steps -->
+
+  <!-- FINAL CARD -->
+  <div class="final-card" id="final-card">
+    <div style="font-size:48px; margin-bottom:16px;">🧠</div>
+    <h2>¡OMNI-AI está funcionando!</h2>
+    <p>Tu IA general está activa, aprende continuamente y se auto-mejora.<br>Aquí tienes lo que puedes hacer ahora mismo:</p>
+
+    <div class="sample-commands">
+      <span class="c-cm"># ENSEÑARLE cualquier cosa:</span><br>
+      <span class="c-kw">/aprender</span> <span class="c-str">https://cualquier-sitio.com</span>       <span class="c-cm">→ aprende de webs</span><br>
+      <span class="c-kw">/aprender</span> <span class="c-str">mi_documento.pdf</span>                 <span class="c-cm">→ aprende de PDFs</span><br>
+      <span class="c-kw">/aprender</span> <span class="c-str">texto que quieras que recuerde</span>    <span class="c-cm">→ conocimiento manual</span><br><br>
+
+      <span class="c-cm"># CHATEAR naturalmente:</span><br>
+      <span class="c-str">¿Qué aprendiste sobre X?</span>                          <span class="c-cm">→ usa su base de conocimiento</span><br>
+      <span class="c-str">Recuérdame que mañana debo...</span>                     <span class="c-cm">→ memoria persistente</span><br>
+      <span class="c-str">Analiza este texto: [pegar texto]</span>                 <span class="c-cm">→ análisis con contexto</span><br><br>
+
+      <span class="c-cm"># AUTO-MEJORA:</span><br>
+      <span class="c-kw">/reflexionar</span>                                       <span class="c-cm">→ analiza su última respuesta</span><br>
+      <span class="c-kw">/feedback</span> <span class="c-str">esa respuesta fue muy larga</span>             <span class="c-cm">→ guía su mejora</span><br>
+      <span class="c-kw">/estado</span>                                            <span class="c-cm">→ estadísticas del sistema</span>
+    </div>
+
+    <div style="margin-top:24px; padding:16px; background:rgba(99,179,237,0.08); border-radius:8px; font-size:13px; color:var(--muted); line-height:1.7;">
+      <strong style="color:var(--blue);">Próximos pasos cuando quieras más poder:</strong><br>
+      Agregar búsqueda web en tiempo real (Tavily API - gratis) · Añadir interfaz web con Gradio · 
+      Conectar a bases de datos · Agregar reconocimiento de imágenes · Fine-tuning con tus datos propios
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+let completedSteps = new Set();
+const totalSteps = 6;
+
+function toggleStep(n) {
+  const steps = document.querySelectorAll('.step');
+  steps.forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    if (sn === n) {
+      if (!s.classList.contains('completed')) {
+        s.classList.toggle('active');
+      }
+    } else if (!s.classList.contains('completed')) {
+      s.classList.remove('active');
+    }
+  });
+}
+
+function completeStep(n) {
+  completedSteps.add(n);
+  const step = document.querySelector(`[data-step="${n}"]`);
+  step.classList.remove('active');
+  step.classList.add('completed');
+  updateProgress();
+
+  // Open next step
+  const next = document.querySelector(`[data-step="${n+1}"]`);
+  if (next && !next.classList.contains('completed')) {
+    next.classList.add('active');
+    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Show final
+  if (completedSteps.size === totalSteps) {
+    setTimeout(() => {
+      const fc = document.getElementById('final-card');
+      fc.classList.add('visible');
+      fc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400);
+  }
+}
+
+function updateProgress() {
+  const pct = (completedSteps.size / totalSteps) * 100;
+  document.getElementById('bar-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${completedSteps.size} / ${totalSteps} pasos`;
+}
+
+function toggleCheck(li) {
+  li.classList.toggle('done');
+  const box = li.querySelector('.check-box');
+  box.textContent = li.classList.contains('done') ? '✓' : '';
+}
+
+function switchTab(group, platform) {
+  // Update tab buttons
+  const header = event.target.closest('.step-content') || document.body;
+  const allTabs = event.target.parentElement.querySelectorAll('.ptab');
+  allTabs.forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // Update content
+  const contents = header.querySelectorAll(`.platform-content[id^="${group}-"]`);
+  contents.forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(`${group}-${platform}`);
+  if (target) target.classList.add('active');
+}
+
+function copyCode(btn, code) {
+  // Get code from parent block if no explicit code passed
+  if (!code) {
+    const block = btn.closest('.code-block');
+    code = block.innerText.replace('copiar\n', '').replace('copied\n', '');
+  }
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

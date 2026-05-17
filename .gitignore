@@ -1,0 +1,37 @@
+# ── OMNI-AI .gitignore ──
+
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+ENV/
+*venv*/
+
+# Configuración sensible (API Keys de Groq, etc.)
+config/.env
+.env
+*.env
+*.key
+credentials*
+
+# Datos locales e ingesta de OMNI-AI
+omni_data/
+temp_uploads/
+
+# Caché y archivos compilados de Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# Carpetas de editores de código e IDEs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db

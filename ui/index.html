@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OMNI-AI · Panel de Inteligencia Cognitiva</title>
+  <!-- Google Fonts & Font Awesome for icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* ── SISTEMA DE DISEÑO & VARIABLES ── */
+    :root {
+      --bg-dark: #060913;
+      --bg-card: rgba(13, 20, 38, 0.6);
+      --bg-card-hover: rgba(20, 32, 60, 0.85);
+      --border-glow: rgba(99, 179, 237, 0.15);
+      --border-glow-active: rgba(79, 209, 197, 0.4);
+      
+      --color-primary: #58a6ff;
+      --color-secondary: #00f2fe;
+      --color-accent: #8a2be2;
+      --color-success: #39e58c;
+      --color-warning: #ffaa00;
+      --color-error: #ff4a4a;
+      
+      --text-main: #f0f3f8;
+      --text-muted: #8b9bb4;
+      --font-main: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── RESET & CONFIG GENERAL ── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      outline: none;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Fondo animado de gradientes glowing */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(88, 166, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 242, 254, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── BARRA DE NAVEGACIÓN PRINCIPAL ── */
+    header {
+      height: 70px;
+      background: rgba(6, 9, 19, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #060913;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-name span {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glow);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-error);
+      box-shadow: 0 0 8px var(--color-error);
+      transition: var(--transition);
+    }
+
+    .status-dot.online {
+      background-color: var(--color-success);
+      box-shadow: 0 0 10px var(--color-success);
+    }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 340px;
+      height: calc(100vh - 70px);
+      z-index: 5;
+      position: relative;
+    }
+
+    /* ── COLUMNAS / SIDEBARS ── */
+    .sidebar {
+      background: rgba(8, 13, 28, 0.4);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid var(--border-glow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    .sidebar.right {
+      border-right: none;
+      border-left: 1px solid var(--border-glow);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title i {
+      color: var(--color-primary);
+    }
+
+    /* Tarjetas del Dashboard */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 16px;
+      transition: var(--transition);
+    }
+
+    .glass-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(99, 179, 237, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* ── SECCIÓN 1: ESTADÍSTICAS DEL SISTEMA ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .stat-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .stat-item:nth-child(1) .stat-icon { background: rgba(88, 166, 255, 0.1); color: var(--color-primary); }
+    .stat-item:nth-child(2) .stat-icon { background: rgba(0, 242, 254, 0.1); color: var(--color-secondary); }
+    .stat-item:nth-child(3) .stat-icon { background: rgba(138, 43, 226, 0.1); color: var(--color-accent); }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* ── SECCIÓN 2: INGESTA DE CONOCIMIENTO (DRAG & DROP) ── */
+    .dropzone {
+      border: 2px dashed var(--border-glow);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--color-primary);
+      background: rgba(88, 166, 255, 0.03);
+    }
+
+    .dropzone i {
+      font-size: 28px;
+      color: var(--color-primary);
+      transition: var(--transition);
+    }
+
+    .dropzone:hover i {
+      transform: translateY(-4px);
+    }
+
+    .dropzone span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(6, 9, 19, 0.6);
+      border: 1px solid var(--border-glow);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: var(--font-main);
+      color: var(--text-main);
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .input-field:focus {
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: #060913;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 242, 254, 0.25);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    /* ── AREA CENTRAL: CHAT HÍBRIDO ── */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: rgba(6, 9, 19, 0.3);
+      position: relative;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Estilos de Burbujas de Chat */
+    .message {
+      display: flex;
+      gap: 16px;
+      max-width: 85%;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .message.user .avatar {
+      background: rgba(138, 43, 226, 0.2);
+      border: 1px solid var(--color-accent);
+      color: var(--color-accent);
+      box-shadow: 0 0 10px rgba(138, 43, 226, 0.15);
+    }
+
+    .message.assistant .avatar {
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid var(--color-secondary);
+      color: var(--color-secondary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.15);
+    }
+
+    .bubble {
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .message.user .bubble {
+      background: rgba(138, 43, 226, 0.12);
+      border: 1px solid rgba(138, 43, 226, 0.25);
+      border-top-right-radius: 2px;
+      color: #f3f0ff;
+    }
+
+    .message.assistant .bubble {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glow);
+      border-top-left-radius: 2px;
+      color: var(--text-main);
+    }
+
+    /* Markdown/Code styling inside bubble */
+    .bubble pre {
+      background: #04070f;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .bubble code {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .bubble pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .bubble p {
+      margin-bottom: 8px;
+    }
+    .bubble p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Mensaje de Carga / Escritura */
+    .loading-skeleton {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+    }
+
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-secondary);
+      animation: pulse-dot 1.4s infinite ease-in-out;
+    }
+
+    .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── BARRA DE MENSAJES INFERIOR ── */
+    .chat-input-bar {
+      padding: 24px 32px 32px;
+      border-top: 1px solid var(--border-glow);
+      background: rgba(6, 9, 19, 0.6);
+      backdrop-filter: blur(8px);
+    }
+
+    .chat-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(13, 20, 38, 0.8);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 6px 12px;
+      transition: var(--transition);
+    }
+
+    .chat-input-wrapper:focus-within {
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.15);
+    }
+
+    .chat-textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      resize: none;
+      color: var(--text-main);
+      font-family: var(--font-main);
+      font-size: 15px;
+      padding: 10px;
+      max-height: 120px;
+      height: 44px;
+    }
+
+    .action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #060913;
+    }
+
+    .btn-send:hover {
+      background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+      transform: scale(1.05);
+      color: #060913;
+    }
+
+    /* Toggles & Options en Chat */
+    .chat-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding: 0 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .toggle-switch {
+      width: 32px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .toggle-knob {
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: var(--transition);
+    }
+
+    input[type="checkbox"]:checked + .toggle-switch {
+      background: var(--color-success);
+    }
+
+    input[type="checkbox"]:checked + .toggle-switch .toggle-knob {
+      transform: translateX(14px);
+    }
+
+    /* ── SECCIÓN 3: REFLEXIONES DE OMNI (SIDEBAR DERECHO) ── */
+    .reflections-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      max-height: 480px;
+    }
+
+    .reflection-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      animation: slideIn 0.3s ease;
+    }
+
+    .reflection-card p {
+      white-space: pre-line;
+    }
+
+    .reflection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--color-secondary);
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .reflection-date {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .welcome-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .welcome-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 15px rgba(0,242,254,0.3));
+    }
+
+    .welcome-screen h2 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .welcome-screen p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    /* ── ANIMACIONES ── */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); }
+      50% { box-shadow: 0 0 35px rgba(138, 43, 226, 0.5); }
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(0.6); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo"><i class="fa-solid fa-brain"></i></div>
+      <div class="brand-name"><span>OMNI</span>-AI</div>
+    </div>
+    <div class="server-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Conectando...</span>
+    </div>
+  </header>
+
+  <!-- CUERPO PRINCIPAL -->
+  <main>
+    
+    <!-- SIDEBAR IZQUIERDO: INGESTA & STATS -->
+    <div class="sidebar">
+      
+      <!-- Stats -->
+      <div>
+        <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Estado Cognitivo</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-meta">
+              <div class="stat-icon"><i class="fa-solid fa-book"></i></div>
+              <span class="stat-label">Documentos RAG</span>
+            </div>
+            <span class="stat-value" id="statDocs">0</span>
+          </div>
+          <div class="stat-item">
+            <div class="stat-meta">
+              <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+              <span class="stat-label">Diálogos Recordados</span>
+            </div>
+            <span class="stat-value" id="statMemory">0</span>
+          </div>
+          <div class="stat-item">
+            <div class="stat-meta">
+              <div class="stat-icon"><i class="fa-solid fa-rotate"></i></div>
+              <span class="stat-label">Auto-Notas</span>
+            </div>
+            <span class="stat-value" id="statReflections">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingesta Drag & Drop -->
+      <div>
+        <div class="section-title"><i class="fa-solid fa-file-arrow-up"></i> Absorber PDF / TXT</div>
+        <div class="glass-card">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <strong>Arrastra archivos aquí</strong>
+            <span>o haz clic para explorar</span>
+            <input type="file" id="fileInput" style="display: none" accept=".pdf,.txt">
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px;" id="uploadStatus">
+            Formatos soportados: PDF y archivos de texto (.txt)
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingesta de URLs -->
+      <div>
+        <div class="section-title"><i class="fa-solid fa-globe"></i> Indexar Enlace Web</div>
+        <div class="glass-card">
+          <form id="urlForm" class="input-group">
+            <input type="url" id="urlInput" placeholder="https://ejemplo.com/articulo" class="input-field" required>
+            <button type="submit" class="btn-submit" id="btnUrlSubmit">
+              <i class="fa-solid fa-graduation-cap"></i> Enseñar a OMNI
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Ingesta de Texto Plano -->
+      <div>
+        <div class="section-title"><i class="fa-solid fa-pen-to-square"></i> Conocimiento Rápido</div>
+        <div class="glass-card">
+          <form id="textForm" class="input-group">
+            <input type="text" id="textTitle" placeholder="Título o tema" class="input-field" required>
+            <textarea id="textContent" placeholder="Escribe algo importante..." class="input-field" style="height: 70px; resize: none;" required></textarea>
+            <button type="submit" class="btn-submit">
+              <i class="fa-solid fa-floppy-disk"></i> Registrar Datos
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- AREA CENTRAL: CHAT HÍBRIDO -->
+    <div class="chat-container">
+      
+      <!-- Listado de mensajes -->
+      <div class="chat-messages" id="chatMessages">
+        
+        <!-- Welcome Screen (Visible solo al inicio) -->
+        <div class="welcome-screen" id="welcomeScreen">
+          <div class="welcome-icon"><i class="fa-solid fa-brain"></i></div>
+          <h2>Conoce a OMNI-AI</h2>
+          <p>Una Inteligencia Artificial General conectada a una base de datos vectorial local. Todo lo que le enseñes a través de webs, PDFs o texto lo recordará y utilizará con prioridad para responderte. Además, aprende analizando sus propias respuestas.</p>
+          <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+            <div class="glass-card" style="flex:1; font-size:13px; cursor:pointer;" onclick="setQuestion('Hola, ¿qué puedes hacer?')">
+              <strong style="color: var(--color-primary);">Chatear</strong><br>Prueba su conocimiento
+            </div>
+            <div class="glass-card" style="flex:1; font-size:13px; cursor:pointer;" onclick="setQuestion('Dime qué has aprendido hasta ahora.')">
+              <strong style="color: var(--color-secondary);">Explorar RAG</strong><br>Verifica su memoria
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Barra de Input del Chat -->
+      <div class="chat-input-bar">
+        <div class="chat-input-wrapper">
+          <textarea id="chatInput" class="chat-textarea" placeholder="Pregúntale cualquier cosa a OMNI..."></textarea>
+          <button class="action-btn btn-send" id="btnSend" onclick="sendMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="chat-options">
+          <label class="toggle-container">
+            <input type="checkbox" id="chkAutoImprove" checked style="display: none;">
+            <div class="toggle-switch">
+              <div class="toggle-knob"></div>
+            </div>
+            <span>Auto-Reflexión Cognitiva activa (cada 3 turnos)</span>
+          </label>
+          <span style="font-family: var(--font-mono); font-size: 11px;" id="lblSession">Sesión: N/A</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR DERECHO: AUTO-NOTAS / REFLEXIONES -->
+    <div class="sidebar right">
+      <div>
+        <div class="section-title"><i class="fa-solid fa-compass"></i> Reflexiones de la IA</div>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+          OMNI-AI se evalúa de manera autónoma. Estas son las notas de aprendizaje y objetivos que genera para automejorar sus respuestas futuras:
+        </div>
+        <div class="reflections-list" id="reflectionsList">
+          <div style="color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 40px;">
+            <i class="fa-solid fa-spinner fa-spin" style="margin-bottom: 10px; font-size: 20px; display: block;"></i>
+            Cargando reflexiones...
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT APLICACIÓN -->
+  <script>
+    const BACKEND_URL = window.location.origin === 'null' || window.location.protocol === 'file:' ? 'http://127.0.0.1:8000' : window.location.origin;
+    let isConnected = false;
+    let isWaitingForResponse = false;
+
+    // ── INICIALIZACIÓN ──
+    window.addEventListener('DOMContentLoaded', () => {
+      checkServerHealth();
+      setInterval(checkServerHealth, 5000); // Chequeo de conexión cada 5s
+      
+      // Auto-redimensionamiento de textarea del chat
+      const chatInput = document.getElementById('chatInput');
+      chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+
+      // Submit on Enter (except Shift+Enter)
+      chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Configurar Drag & Drop
+      setupDragAndDrop();
+
+      // Enlaces y Formularios
+      document.getElementById('urlForm').addEventListener('submit', learnUrl);
+      document.getElementById('textForm').addEventListener('submit', learnText);
+    });
+
+    // ── CHEQUEO DE SALUD DEL SERVIDOR ──
+    async function checkServerHealth() {
+      try {
+        const response = await fetch(`${BACKEND_URL}/`);
+        const data = await response.json();
+        
+        if (data.status === 'online' || data.status === 'missing_api_key') {
+          setConnectionState(true, data.status === 'missing_api_key' ? '⚠️ API KEY FALTANTE' : 'API ONLINE');
+          updateStats();
+          updateReflections();
+        } else {
+          setConnectionState(false, 'APAGADO');
+        }
+      } catch (error) {
+        setConnectionState(false, 'DESCONECTADO');
+      }
+    }
+
+    function setConnectionState(online, text) {
+      const dot = document.getElementById('statusDot');
+      const label = document.getElementById('statusText');
+      
+      isConnected = online;
+      
+      if (online) {
+        dot.className = 'status-dot online';
+        label.textContent = text;
+        label.style.color = '#39e58c';
+      } else {
+        dot.className = 'status-dot';
+        label.textContent = text;
+        label.style.color = '#ff4a4a';
+      }
+    }
+
+    // ── OBTENER STATS Y REFLEXIONES ──
+    async function updateStats() {
+      if (!isConnected) return;
+      try {
+        const response = await fetch(`${BACKEND_URL}/status`);
+        const data = await response.json();
+        
+        if (data.status === 'active') {
+          document.getElementById('statDocs').textContent = data.database_stats.knowledge_documents;
+          document.getElementById('statMemory').textContent = data.database_stats.conversation_memories;
+          document.getElementById('statReflections').textContent = data.database_stats.self_improvement_notes;
+          document.getElementById('lblSession').textContent = `Sesión: ${data.session_id}`;
+        }
+      } catch (e) {
+        console.error("Error cargando stats:", e);
+      }
+    }
+
+    async function updateReflections() {
+      if (!isConnected) return;
+      try {
+        const response = await fetch(`${BACKEND_URL}/reflections`);
+        const data = await response.json();
+        const container = document.getElementById('reflectionsList');
+        
+        if (data.reflections && data.reflections.length > 0) {
+          container.innerHTML = '';
+          data.reflections.forEach((reflection, index) => {
+            const card = document.createElement('div');
+            card.className = 'reflection-card';
+            
+            // Determinar si es un objetivo de mejora
+            const isGoal = reflection.includes('OBJETIVO:');
+            const title = isGoal ? '🎯 Meta de Aprendizaje' : '💡 Auto-Reflexión';
+            const cleanText = reflection.replace('OBJETIVO:', '').trim();
+            
+            card.innerHTML = `
+              <div class="reflection-header" style="color: ${isGoal ? 'var(--color-success)' : 'var(--color-secondary)'}">
+                <span>${title}</span>
+                <span class="reflection-date">#${index + 1}</span>
+              </div>
+              <p>${escapeHTML(cleanText)}</p>
+            `;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = `
+            <div style="color: var(--text-muted); font-size: 13px; text-align: center; margin-top: 40px;">
+              <i class="fa-solid fa-lightbulb" style="font-size: 24px; display: block; margin-bottom: 12px; color: var(--color-warning);"></i>
+              No hay auto-notas registradas.<br>Conversa con OMNI para activar la auto-mejora.
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error("Error cargando reflexiones:", e);
+      }
+    }
+
+    // ── CHATEAR CON OMNI ──
+    function setQuestion(q) {
+      document.getElementById('chatInput').value = q;
+      sendMessage();
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const messageText = input.value.trim();
+      
+      if (!messageText || isWaitingForResponse) return;
+      if (!isConnected) {
+        alert("El backend de OMNI-AI no está activo. Ejecuta 'python server.py' primero.");
+        return;
+      }
+
+      // Ocultar pantalla de bienvenida
+      const welcome = document.getElementById('welcomeScreen');
+      if (welcome) welcome.remove();
+
+      // Agregar mensaje del usuario a la pantalla
+      appendMessage('user', messageText);
+      input.value = '';
+      input.style.height = '44px'; // Reset height
+      
+      // Mostrar indicador de carga
+      const loadingId = appendLoadingIndicator();
+      isWaitingForResponse = true;
+
+      try {
+        const autoImprove = document.getElementById('chkAutoImprove').checked;
+        const response = await fetch(`${BACKEND_URL}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: messageText, auto_improve: autoImprove })
+        });
+        
+        const data = await response.json();
+        
+        // Quitar indicador de carga
+        removeLoadingIndicator(loadingId);
+        
+        if (response.ok) {
+          appendMessage('assistant', data.answer);
+          updateStats();
+          updateReflections();
+        } else {
+          appendMessage('assistant', `❌ **Error en el servidor:** ${data.detail || 'Error desconocido'}`);
+        }
+      } catch (error) {
+        removeLoadingIndicator(loadingId);
+        appendMessage('assistant', `❌ **Error de Red:** No se pudo conectar con el servidor API de OMNI.`);
+      } finally {
+        isWaitingForResponse = false;
+      }
+    }
+
+    function appendMessage(role, text) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${role}`;
+      
+      const avatarIcon = role === 'user' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-brain"></i>';
+      
+      // Formatear Markdown básico (bloques de código y texto en negrita)
+      const formattedText = formatMarkdown(text);
+      
+      msgDiv.innerHTML = `
+        <div class="avatar">${avatarIcon}</div>
+        <div class="bubble">${formattedText}</div>
+      `;
+      
+      messagesContainer.appendChild(msgDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function appendLoadingIndicator() {
+      const messagesContainer = document.getElementById('chatMessages');
+      const loadingDiv = document.createElement('div');
+      const id = 'loading_' + Date.now();
+      
+      loadingDiv.className = 'message assistant';
+      loadingDiv.id = id;
+      loadingDiv.innerHTML = `
+        <div class="avatar"><i class="fa-solid fa-brain"></i></div>
+        <div class="bubble">
+          <div class="loading-skeleton">
+            <div class="dot-pulse"></div>
+            <div class="dot-pulse"></div>
+            <div class="dot-pulse"></div>
+          </div>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(loadingDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return id;
+    }
+
+    function removeLoadingIndicator(id) {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }
+
+    // ── MÓDULOS DE APRENDIZAJE (INGESTIÓN) ──
+    
+    // 1. Aprender Enlace Web (URL)
+    async function learnUrl(e) {
+      e.preventDefault();
+      if (!isConnected) return alert("Conecta el backend primero.");
+      
+      const input = document.getElementById('urlInput');
+      const btn = document.getElementById('btnUrlSubmit');
+      const url = input.value.trim();
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Indexando...';
+      
+      try {
+        const formData = new FormData();
+        formData.append('url', url);
+        
+        const response = await fetch(`${BACKEND_URL}/learn/url`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          alert(`¡Éxito! OMNI ha absorbido el sitio web.\n${data.message}`);
+          input.value = '';
+          updateStats();
+        } else {
+          alert(`Error al aprender URL: ${data.detail || 'Fallo desconocido'}`);
+        }
+      } catch (err) {
+        alert("Error de red al registrar la URL.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-graduation-cap"></i> Enseñar a OMNI';
+      }
+    }
+
+    // 2. Aprender Texto Rápido
+    async function learnText(e) {
+      e.preventDefault();
+      if (!isConnected) return alert("Conecta el backend primero.");
+      
+      const titleInput = document.getElementById('textTitle');
+      const contentInput = document.getElementById('textContent');
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      
+      try {
+        const response = await fetch(`${BACKEND_URL}/learn/text`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: content, source_name: title })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          alert("¡Dato guardado! La IA lo ha registrado con éxito en su base de conocimiento.");
+          titleInput.value = '';
+          contentInput.value = '';
+          updateStats();
+        } else {
+          alert("No se pudo registrar el texto.");
+        }
+      } catch (err) {
+        alert("Error de red al enviar el texto.");
+      }
+    }
+
+    // 3. Subir Archivos (PDF/TXT) con Drag & Drop
+    function setupDragAndDrop() {
+      const dropzone = document.getElementById('dropzone');
+      const fileInput = document.getElementById('fileInput');
+      const statusText = document.getElementById('uploadStatus');
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        }, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        }, false);
+      });
+      
+      dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          uploadFile(files[0]);
+        }
+      });
+      
+      fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+          uploadFile(this.files[0]);
+        }
+      });
+    }
+
+    async function uploadFile(file) {
+      if (!isConnected) return alert("Conecta el backend primero.");
+      
+      const statusText = document.getElementById('uploadStatus');
+      statusText.innerHTML = `<span style="color: var(--color-secondary);"><i class="fa-solid fa-spinner fa-spin"></i> Subiendo y absorbiendo: ${file.name}...</span>`;
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+        const response = await fetch(`${BACKEND_URL}/learn/file`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          statusText.innerHTML = `<span style="color: var(--color-success);"><i class="fa-solid fa-check"></i> ¡Absorbido con éxito: ${file.name}!</span>`;
+          setTimeout(() => {
+            statusText.textContent = "Formatos soportados: PDF y archivos de texto (.txt)";
+          }, 5000);
+          updateStats();
+        } else {
+          statusText.innerHTML = `<span style="color: var(--color-error);"><i class="fa-solid fa-xmark"></i> Error: ${data.message || 'No se pudo procesar.'}</span>`;
+        }
+      } catch (err) {
+        statusText.innerHTML = `<span style="color: var(--color-error);"><i class="fa-solid fa-xmark"></i> Error de red al procesar el archivo.</span>`;
+      }
+    }
+
+    // ── FORMATEO DE TEXTOS & MARKDOWN LIGERO ──
+    function formatMarkdown(text) {
+      // Escapar HTML básico para prevenir inyecciones
+      let escaped = escapeHTML(text);
+      
+      // Bloques de código ```código```
+      escaped = escaped.replace(/```([\s\S]*?)```/g, (match, p1) => {
+        return `<pre><code>${p1.trim()}</code></pre>`;
+      });
+      
+      // Código en línea `código`
+      escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      // Negrita **texto**
+      escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      
+      // Saltos de línea
+      escaped = escaped.replace(/\n/g, '<br>');
+      
+      return escaped;
+    }
+
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+
+</body>
+</html>
