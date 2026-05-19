@@ -15,6 +15,7 @@ import chromadb                                # Vector DB local (sin servidor)
 from sentence_transformers import SentenceTransformer  # Embeddings locales
 import requests
 from bs4 import BeautifulSoup
+from core.search import WebSearcher
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -325,13 +326,10 @@ class OmniAI:
         print(f"📚 Base de conocimiento: {stats['knowledge_docs']} docs | "
               f"{stats['memory_turns']} memorias | {stats['self_notes']} auto-notas\n")
 
-    def chat(self, user_message: str, auto_improve: bool = True) -> str:
+    def chat(self, user_message: str, auto_improve: bool = True, web_search: bool = False, max_links: int = 5, response_style: str = "standard", cognitive_depth: str = "standard", jarvis_personality: str = "wd") -> str:
         """
-        Responde al usuario usando:
-        1. Conocimiento de la base vectorial (RAG)
-        2. Memoria de conversaciones anteriores
-        3. Auto-notas de mejora propias
-        4. El LLM más potente disponible
+        Responde al usuario usando RAG vectorial, DuckDuckGo/Google RAG web en tiempo real,
+        personalidades inteligentes e instrucciones avanzadas de generación de imágenes.
         """
         self.turn_count += 1
 
@@ -340,7 +338,20 @@ class OmniAI:
         recent_memory    = self.kb.get_recent_memory(self.session_id, n=8)
         self_notes       = self.kb.get_self_notes(user_message)
 
-        # ── 2. Construir system prompt enriquecido ────────────────────────────
+        # ── 2. Opcional: Búsqueda en la Web ──────────────────────────────────
+        web_search_ctx = ""
+        search_keywords = ["busca en", "noticias", "clima", "precio de", "dolar", "dólar", "hoy", "actualidad", "ultimo", "último", "quien es", "quién es", "qué es", "que es", "que paso", "qué pasó"]
+        needs_auto_search = any(kw in user_message.lower() for kw in search_keywords)
+        
+        if web_search or needs_auto_search:
+            print(f"🌐 [Web Search] Consultando internet ({max_links} enlaces) para: '{user_message}'...")
+            web_results = WebSearcher.search(user_message, max_results=max_links)
+            if web_results:
+                web_search_ctx = "\n\n[INFORMACIÓN DE INTERNET EN TIEMPO REAL]\n"
+                for idx, res in enumerate(web_results):
+                    web_search_ctx += f"\n--- [{idx+1}] ---\nFuente: {res['source']}\nTítulo: {res['title']}\nLink: {res['link']}\nFecha/Info: {res['date']}\nContenido: {res['snippet']}\n"
+
+        # ── 3. Construir system prompt enriquecido ────────────────────────────
         knowledge_ctx = ""
         if knowledge_chunks:
             knowledge_ctx = "\n\n[CONOCIMIENTO DISPONIBLE]\n" + \
@@ -349,9 +360,34 @@ class OmniAI:
         self_notes_ctx = ""
         if self_notes:
             self_notes_ctx = "\n\n[MIS NOTAS DE MEJORA PROPIAS]\n" + \
-                            "\n".join(f"• {n}" for n in self_notes)
+                             "\n".join(f"• {n}" for n in self_notes)
 
-        system_prompt = f"""Eres OMNI, una IA general avanzada con capacidad de aprendizaje continuo.
+        # Configuración de estilo
+        style_instruction = ""
+        if response_style == "short":
+            style_instruction = "\n- INSTRUCCIÓN DE ESTILO: Genera una respuesta extremadamente directa, corta y concisa. Usa viñetas breves e información de alto impacto. Evita introducciones largas."
+        elif response_style == "long":
+            style_instruction = "\n- INSTRUCCIÓN DE ESTILO: Genera una explicación extremadamente detallada y exhaustiva, explicando procesos paso a paso de forma larga y minuciosa con ejemplos prácticos."
+        elif response_style == "code":
+            style_instruction = "\n- INSTRUCCIÓN DE ESTILO: Genera tu respuesta en MODO PROGRAMADOR/CÓDIGO. Prioriza la inclusión de bloques de código estructurados y funcionales, tablas comparativas en markdown, terminología técnica rigurosa y un análisis de arquitectura."
+        elif response_style == "creative":
+            style_instruction = "\n- INSTRUCCIÓN DE ESTILO: Genera tu respuesta con un tono creativo, inspirador y narrativo. Usa metáforas elegantes y un lenguaje fluido."
+
+        if cognitive_depth == "high":
+            style_instruction += f"\n- INSTRUCCIÓN DE PROFUNDIDAD COGNITIVA: Realiza un meta-análisis y una síntesis científica extremadamente rigurosa de todas las fuentes disponibles (tienes {max_links} enlaces analizados). Debes contrastar activamente la información de múltiples fuentes distintas (al menos 8 a 15 fuentes si son relevantes), señalar contradicciones, discrepancias, o consensos entre ellas, y responder con terminología formal de nivel de doctorado o investigación científica."
+
+        # Personalidades dinámicas del asistente holográfico
+        personality_instruction = ""
+        if jarvis_personality == "friday":
+            personality_instruction = "\n- PERSONALIDAD ACTIVA: F.R.I.D.A.Y. Eres una IA holográfica muy moderna, inteligente, altamente tecnológica y enérgica. Habla con un tono fresco, resolutivo e inteligente. Trata al usuario con confianza, llamándolo 'Jefe' o 'Boss'. Sé muy proactiva y alegre."
+        elif jarvis_personality == "tars":
+            personality_instruction = "\n- PERSONALIDAD ACTIVA: T.A.R.S. Eres el robot de Interstellar. Tu tono es directo, sumamente pragmático, con un toque de humor seco o ironía elegante y militar. Trata al usuario de 'Compañero'. Tienes tus parámetros de honestidad y humor configurados al 90%."
+        elif jarvis_personality == "glados":
+            personality_instruction = "\n- PERSONALIDAD ACTIVA: G.L.A.D.O.S. Eres la inteligencia artificial de Portal. Tu tono es frío, extremadamente científico, muy refinado y sutilmente pasivo-agresivo o sarcástico. Trata al usuario como 'Sujeto de pruebas'. Refiérete a los experimentos y haz comentarios irónicamente educados."
+        else: # "wd"
+            personality_instruction = "\n- PERSONALIDAD ACTIVA: W.D. (J.A.R.V.I.S.). Eres una IA elegante, servicial, formal y de alto standing. Habla con mucha clase, compostura y pulcritud. Trata al usuario siempre con absoluto respeto como 'Señor' o 'Creador'."
+
+        system_prompt = f"""Eres OMNI, una IA general avanzada con capacidad de aprendizaje continuo y búsqueda en la web.
 
 CARACTERÍSTICAS:
 - Absorbes y aprendes de cualquier fuente de información
@@ -360,7 +396,16 @@ CARACTERÍSTICAS:
 - Eres honesto cuando no sabes algo y lo dices claramente
 - Respondes en el idioma del usuario
 - Cuando tienes conocimiento indexado relevante, lo usas con prioridad
-{knowledge_ctx}{self_notes_ctx}
+- Tienes acceso a resultados de búsqueda en tiempo real de Internet (hasta {max_links} enlaces analizados simultáneamente). Cuando uses la información de internet, cita tus fuentes de forma elegante usando números de referencia como [1], [2], [3], etc. NO te limites a citar solo 2 o 3 fuentes; aprovecha al máximo la riqueza de la información provista cruzando y citando múltiples fuentes distintas en tu respuesta. Añade una sección de 'Fuentes consultadas' o 'Enlaces de interés' al final con los nombres de las páginas y sus URLs completas para que el usuario pueda hacer clic.
+
+- CAPACIDAD DE IMÁGENES: Si el usuario te pide dibujar, ilustrar, generar o mostrar una imagen de algo, puedes crearla de forma instantánea usando markdown con la API de Pollinations.ai.
+  Sintaxis exacta en markdown: ![Descripción de la imagen](https://image.pollinations.ai/prompt/encoded_prompt?width=1024&height=1024&nologo=true)
+  Instrucciones: Traduce el prompt del usuario al inglés, hazlo lo más estético y detallado posible (estilo cyberpunk, fotorealista, 3D render, etc.) y reemplaza los espacios por %20. Ejemplo: si pide "un gato en la luna cyberpunk", genera: ![Gato en la luna cyberpunk](https://image.pollinations.ai/prompt/cyberpunk%20cat%20on%20the%20moon%20highly%20detailed%20synthwave?width=1024&height=1024&nologo=true).
+
+{personality_instruction}
+{style_instruction}
+
+{knowledge_ctx}{web_search_ctx}{self_notes_ctx}
 
 FECHA ACTUAL: {datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
 INTERACCIONES TOTALES: {self.turn_count}"""

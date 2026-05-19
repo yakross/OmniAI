@@ -47,7 +47,8 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
     }
 
@@ -685,6 +686,296 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.15);
     }
+
+    /* ── SISTEMA GENERAL J.A.R.V.I.S. (VOICE MODE) ── */
+    .jarvis-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #060913;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.25);
+      transition: var(--transition);
+      font-family: var(--font-main);
+    }
+    .jarvis-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(138, 43, 226, 0.5);
+    }
+    
+    .jarvis-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 14, 0.96);
+      backdrop-filter: blur(25px);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .jarvis-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .jarvis-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      max-width: 650px;
+      width: 90%;
+      text-align: center;
+    }
+    
+    /* Hologram Core */
+    .jarvis-core-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .jarvis-core {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, rgba(6, 9, 19, 0.9) 70%);
+      border: 3px solid var(--color-secondary);
+      box-shadow: 0 0 40px rgba(0, 242, 254, 0.4), inset 0 0 30px rgba(0, 242, 254, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 5;
+    }
+    
+    .jarvis-core i {
+      font-size: 40px;
+      color: var(--color-secondary);
+      text-shadow: 0 0 15px rgba(0, 242, 254, 0.7);
+      transition: var(--transition);
+    }
+    
+    /* Concentric outer rings */
+    .jarvis-ring-outer {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 2px dashed rgba(0, 242, 254, 0.3);
+      animation: rotate-clockwise 15s linear infinite;
+    }
+    
+    .jarvis-ring-inner {
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      border: 1px double rgba(138, 43, 226, 0.4);
+      animation: rotate-counter 10s linear infinite;
+    }
+    
+    /* State-based modifications */
+    .jarvis-overlay.listening .jarvis-core {
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 60px rgba(0, 242, 254, 0.7), inset 0 0 45px rgba(0, 242, 254, 0.5);
+      transform: scale(1.05);
+    }
+    .jarvis-overlay.listening .jarvis-core i {
+      animation: pulse-icon 1.5s infinite ease-in-out;
+      color: var(--color-secondary);
+    }
+    
+    .jarvis-overlay.processing .jarvis-core {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 60px rgba(138, 43, 226, 0.7), inset 0 0 45px rgba(138, 43, 226, 0.5);
+      animation: jarvis-beat 0.6s infinite alternate ease-in-out;
+    }
+    
+    .jarvis-overlay.processing .jarvis-core i {
+      color: var(--color-accent);
+      text-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
+    }
+    
+    .jarvis-overlay.speaking .jarvis-core {
+      border-color: var(--color-success);
+      box-shadow: 0 0 65px rgba(57, 229, 140, 0.7), inset 0 0 45px rgba(57, 229, 140, 0.5);
+    }
+    
+    .jarvis-overlay.speaking .jarvis-core i {
+      color: var(--color-success);
+      text-shadow: 0 0 15px rgba(57, 229, 140, 0.7);
+    }
+    
+    /* Voice waves */
+    .jarvis-waves {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 40px;
+      margin-top: 5px;
+    }
+    
+    .jarvis-wave-bar {
+      width: 4px;
+      height: 8px;
+      background-color: var(--color-secondary);
+      border-radius: 4px;
+      transition: all 0.15s ease;
+      opacity: 0.3;
+    }
+    
+    .jarvis-overlay.listening .jarvis-wave-bar {
+      opacity: 1;
+      animation: sound-wave 1.2s infinite ease-in-out alternate;
+    }
+    
+    .jarvis-overlay.speaking .jarvis-wave-bar {
+      opacity: 1;
+      background-color: var(--color-success);
+      animation: sound-wave 0.8s infinite ease-in-out alternate;
+    }
+    
+    .jarvis-overlay.listening .jarvis-wave-bar:nth-child(1) { animation-delay: 0.1s; }
+    .jarvis-overlay.listening .jarvis-wave-bar:nth-child(2) { animation-delay: 0.3s; }
+    .jarvis-overlay.listening .jarvis-wave-bar:nth-child(3) { animation-delay: 0.5s; }
+    .jarvis-overlay.listening .jarvis-wave-bar:nth-child(4) { animation-delay: 0.2s; }
+    .jarvis-overlay.listening .jarvis-wave-bar:nth-child(5) { animation-delay: 0.4s; }
+    
+    .jarvis-overlay.speaking .jarvis-wave-bar:nth-child(1) { animation-delay: 0.2s; }
+    .jarvis-overlay.speaking .jarvis-wave-bar:nth-child(2) { animation-delay: 0.4s; }
+    .jarvis-overlay.speaking .jarvis-wave-bar:nth-child(3) { animation-delay: 0.1s; }
+    .jarvis-overlay.speaking .jarvis-wave-bar:nth-child(4) { animation-delay: 0.5s; }
+    .jarvis-overlay.speaking .jarvis-wave-bar:nth-child(5) { animation-delay: 0.3s; }
+
+    /* HUD elements */
+    .jarvis-status {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-main);
+      margin-top: 5px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+    
+    .jarvis-transcription {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      min-height: 100px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    
+    .jarvis-transcription strong {
+      color: var(--text-main);
+      font-style: normal;
+    }
+    
+    .jarvis-controls {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    
+    .jarvis-ctrl-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-glow);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      font-family: var(--font-main);
+    }
+    
+    .jarvis-ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(99, 179, 237, 0.3);
+    }
+    
+    .jarvis-ctrl-btn.exit {
+      background: rgba(255, 74, 74, 0.1);
+      border-color: rgba(255, 74, 74, 0.25);
+      color: var(--color-error);
+    }
+    
+    .jarvis-ctrl-btn.exit:hover {
+      background: rgba(255, 74, 74, 0.2);
+      box-shadow: 0 0 15px rgba(255, 74, 74, 0.2);
+    }
+
+    /* KEYFRAMES FOR J.A.R.V.I.S. */
+    @keyframes rotate-clockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes rotate-counter {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(-360deg); }
+    }
+    @keyframes pulse-icon {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    @keyframes sound-wave {
+      0% { height: 8px; }
+      100% { height: 35px; }
+    }
+    @keyframes jarvis-beat {
+      to { transform: scale(1.06); }
+    }
+
+    /* ── RESPONSIVE MEDIA QUERIES ── */
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        min-height: calc(100vh - 70px);
+      }
+      .sidebar {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-glow);
+        height: auto !important;
+        overflow-y: visible !important;
+      }
+      .sidebar.right {
+        border-left: none !important;
+        border-top: 1px solid var(--border-glow);
+        height: auto !important;
+        overflow-y: visible !important;
+      }
+      .chat-container {
+        height: 600px !important;
+        border-bottom: 1px solid var(--border-glow);
+      }
+    }
   </style>
 </head>
 <body>
@@ -695,9 +986,12 @@
       <div class="brand-logo"><i class="fa-solid fa-brain"></i></div>
       <div class="brand-name"><span>OMNI</span>-AI</div>
     </div>
-    <div class="server-status">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Conectando...</span>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button class="jarvis-btn" onclick="activateJarvis()"><i class="fa-solid fa-microphone"></i> MODO W.D.</button>
+      <div class="server-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Conectando...</span>
+      </div>
     </div>
   </header>
 
@@ -731,6 +1025,60 @@
               <span class="stat-label">Auto-Notas</span>
             </div>
             <span class="stat-value" id="statReflections">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ajustes de Inteligencia Cognitiva -->
+      <div>
+        <div class="section-title"><i class="fa-solid fa-sliders"></i> Ajustes de Inteligencia</div>
+        <div class="glass-card" style="display: flex; flex-direction: column; gap: 14px;">
+          <!-- Cantidad de Links (1 - 50) -->
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+              <span>Escaneo en Paralelo (RAG Web)</span>
+              <strong id="valMaxLinks" style="color: var(--color-secondary);">5 links</strong>
+            </div>
+            <input type="range" id="rngMaxLinks" min="1" max="50" value="5" class="input-field" style="padding: 0; height: 6px; cursor: pointer; accent-color: var(--color-secondary);">
+          </div>
+
+          <!-- Estilo de Respuesta -->
+          <div>
+            <div style="font-size: 12px; margin-bottom: 6px;">Estilo de Respuesta</div>
+            <select id="selResponseStyle" class="input-field" style="background: rgba(6, 9, 19, 0.85); width: 100%;">
+              <option value="standard" selected>Estándar (Equilibrado)</option>
+              <option value="short">Corta y Directa ⚡</option>
+              <option value="long">Exhaustiva y Larga 📚</option>
+              <option value="code">Modo Programador / Código 💻</option>
+              <option value="creative">Creativa y Narrativa 🎨</option>
+            </select>
+          </div>
+
+          <!-- Variante de Personalidad (W.D. / Jarvis) -->
+          <div>
+            <div style="font-size: 12px; margin-bottom: 6px;">Variante de Personalidad (W.D.)</div>
+            <select id="selJarvisVoice" class="input-field" style="background: rgba(6, 9, 19, 0.85); width: 100%;" onchange="changeJarvisPersonality()">
+              <option value="wd" selected>W.D. (Jarvis - Formal)</option>
+              <option value="friday">F.R.I.D.A.Y. (Coloquial) ⚡</option>
+              <option value="tars">T.A.R.S. (Irónico/Directo) 🦾</option>
+              <option value="glados">G.L.A.D.O.S. (Sarcástica) 🧪</option>
+            </select>
+          </div>
+
+          <!-- Profundidad Cognitiva (Meta-análisis) -->
+          <div>
+            <label class="toggle-container" style="justify-content: space-between; width: 100%;">
+              <span>Meta-Análisis Científico 🔬</span>
+              <div style="display: flex; align-items: center;">
+                <input type="checkbox" id="chkCognitiveDepth" style="display: none;">
+                <div class="toggle-switch">
+                  <div class="toggle-knob"></div>
+                </div>
+              </div>
+            </label>
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3;">
+              Compara hechos, detecta contradicciones entre enlaces y responde con rigurosidad de doctorado.
+            </div>
           </div>
         </div>
       </div>
@@ -812,13 +1160,22 @@
           </button>
         </div>
         <div class="chat-options">
-          <label class="toggle-container">
-            <input type="checkbox" id="chkAutoImprove" checked style="display: none;">
-            <div class="toggle-switch">
-              <div class="toggle-knob"></div>
-            </div>
-            <span>Auto-Reflexión Cognitiva activa (cada 3 turnos)</span>
-          </label>
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <label class="toggle-container">
+              <input type="checkbox" id="chkAutoImprove" checked style="display: none;">
+              <div class="toggle-switch">
+                <div class="toggle-knob"></div>
+              </div>
+              <span>Auto-Reflexión Cognitiva (cada 3 turnos)</span>
+            </label>
+            <label class="toggle-container">
+              <input type="checkbox" id="chkWebSearch" style="display: none;">
+              <div class="toggle-switch">
+                <div class="toggle-knob"></div>
+              </div>
+              <span>Búsqueda en Internet en Tiempo Real 🌐</span>
+            </label>
+          </div>
           <span style="font-family: var(--font-mono); font-size: 11px;" id="lblSession">Sesión: N/A</span>
         </div>
       </div>
@@ -875,6 +1232,15 @@
       // Enlaces y Formularios
       document.getElementById('urlForm').addEventListener('submit', learnUrl);
       document.getElementById('textForm').addEventListener('submit', learnText);
+
+      // Slider de Enlaces
+      const rngMaxLinks = document.getElementById('rngMaxLinks');
+      const valMaxLinks = document.getElementById('valMaxLinks');
+      if (rngMaxLinks && valMaxLinks) {
+        rngMaxLinks.addEventListener('input', function() {
+          valMaxLinks.textContent = this.value + ' links';
+        });
+      }
     });
 
     // ── CHEQUEO DE SALUD DEL SERVIDOR ──
@@ -1001,10 +1367,24 @@
 
       try {
         const autoImprove = document.getElementById('chkAutoImprove').checked;
+        const webSearch = document.getElementById('chkWebSearch').checked;
+        const maxLinks = parseInt(document.getElementById('rngMaxLinks').value, 10);
+        const responseStyle = document.getElementById('selResponseStyle').value;
+        const cognitiveDepth = document.getElementById('chkCognitiveDepth').checked ? 'high' : 'standard';
+        const jarvisPersonality = document.getElementById('selJarvisVoice').value;
+
         const response = await fetch(`${BACKEND_URL}/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: messageText, auto_improve: autoImprove })
+          body: JSON.stringify({ 
+            message: messageText, 
+            auto_improve: autoImprove, 
+            web_search: webSearch,
+            max_links: maxLinks,
+            response_style: responseStyle,
+            cognitive_depth: cognitiveDepth,
+            jarvis_personality: jarvisPersonality
+          })
         });
         
         const data = await response.json();
@@ -1228,6 +1608,17 @@
       // Negrita **texto**
       escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
       
+      // Imágenes en markdown ![alt](url) (Decodificar &amp; a & de la URL escapada de HTML)
+      escaped = escaped.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+        const cleanUrl = url.replace(/&amp;/g, '&');
+        return `
+          <div class="message-image-container" style="margin: 14px 0; max-width: 100%; border-radius: 16px; overflow: hidden; display: inline-block;">
+            <img src="${cleanUrl}" alt="${alt}" style="max-width: 100%; max-height: 400px; border-radius: 16px; border: 1.5px solid rgba(0, 242, 254, 0.25); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 242, 254, 0.15); display: block; object-fit: contain; cursor: zoom-in; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(0, 242, 254, 0.35), 0 0 25px rgba(0, 242, 254, 0.25)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 242, 254, 0.15)';" onclick="window.open('${cleanUrl}', '_blank')" onerror="this.parentElement.innerHTML='<span style=\'color:var(--color-error);font-size:11px;font-family:var(--font-mono);background:rgba(255,107,107,0.1);padding:6px 12px;border-radius:8px;border:1px solid rgba(255,107,107,0.2);display:inline-block;\'><i class=\'fa-solid fa-triangle-exclamation\'></i> Error al generar/cargar imagen de Pollinations.ai. Reintente de nuevo.</span>';">
+            <span style="display:block; font-size:10px; color:var(--text-muted); font-family:var(--font-mono); margin-top:8px; text-align:center; text-shadow: 0 0 3px rgba(0,0,0,0.5);"><i class="fa-solid fa-image"></i> ${alt || 'Ilustración generada por OMNI-AI'}</span>
+          </div>
+        `;
+      });
+
       // Saltos de línea
       escaped = escaped.replace(/\n/g, '<br>');
       
@@ -1244,5 +1635,592 @@
     }
   </script>
 
+  <!-- OVERLAY W.D. -->
+  <div class="jarvis-overlay" id="jarvisOverlay">
+    <div class="jarvis-container">
+      <h1 style="font-size: 26px; font-weight: 900; background: linear-gradient(90deg, var(--color-secondary), var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.05em; margin-bottom: 25px;">SISTEMA GENERAL W.D.</h1>
+      
+      <!-- HUD de Estado W.D. -->
+      <div style="display: flex; gap: 15px; font-family: var(--font-mono); font-size: 11px; color: var(--color-secondary); text-transform: uppercase; background: rgba(0, 242, 254, 0.04); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(0, 242, 254, 0.12); margin-top: -20px; box-shadow: 0 0 15px rgba(0, 242, 254, 0.05);">
+        <span>🔋 Red RAG: <strong id="jarvisHUDDocs">0</strong> pasajes</span>
+        <span>🧠 Memoria: <strong id="jarvisHUDMem">0</strong> turnos</span>
+        <span>⚡ IA: <strong style="color: var(--color-accent);">LLAMA-3.3 70B</strong></span>
+      </div>
+      
+      <div class="jarvis-core-wrapper">
+        <div class="jarvis-ring-outer"></div>
+        <div class="jarvis-ring-inner"></div>
+        <div class="jarvis-core" id="jarvisCore">
+          <i class="fa-solid fa-microphone" id="jarvisCoreIcon"></i>
+        </div>
+      </div>
+      
+      <!-- Dynamic Holographic Canvas Waveform Visualizer -->
+      <div style="height: 60px; display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+        <canvas id="jarvisCanvas" width="350" height="60" style="width: 350px; height: 60px; filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.45));"></canvas>
+      </div>
+      
+      <div class="jarvis-status" id="jarvisStatus">SISTEMA INICIADO</div>
+      
+      <!-- Selector de Personalidad de Voz en el Overlay -->
+      <div style="margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
+        <span style="color: rgba(255,255,255,0.65); text-shadow: 0 0 5px rgba(0, 242, 254, 0.35);"><i class="fa-solid fa-user-gear"></i> Variante OMNI:</span>
+        <select id="selJarvisVoiceOverlay" style="background: rgba(0, 242, 254, 0.08); color: var(--color-secondary); border: 1.5px solid rgba(0, 242, 254, 0.25); border-radius: 8px; padding: 4px 10px; font-size: 11px; cursor: pointer; outline: none;" onchange="document.getElementById('selJarvisVoice').value = this.value; changeJarvisPersonality();">
+          <option value="wd">W.D. (Jarvis - Formal)</option>
+          <option value="friday">F.R.I.D.A.Y. (Coloquial)</option>
+          <option value="tars">T.A.R.S. (Irónico/Directo)</option>
+          <option value="glados">G.L.A.D.O.S. (Sarcástica)</option>
+        </select>
+      </div>
+      
+      <div class="jarvis-transcription" id="jarvisTranscription">
+        Haz clic en <strong>Escuchar</strong> o habla directamente si el bucle continuo está activo...
+      </div>
+      
+      <div class="jarvis-controls">
+        <button class="jarvis-ctrl-btn" id="btnJarvisListen" onclick="startJarvisListening()"><i class="fa-solid fa-microphone"></i> Escuchar</button>
+        <button class="jarvis-ctrl-btn" id="btnJarvisLoop" onclick="toggleJarvisLoop()" style="color: var(--color-success); border-color: rgba(57, 229, 140, 0.25);"><i class="fa-solid fa-arrows-spin"></i> Bucle Continuo: ON</button>
+        <button class="jarvis-ctrl-btn exit" onclick="deactivateJarvis()"><i class="fa-solid fa-power-off"></i> Desactivar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT W.D. -->
+  <script>
+    let recognition = null;
+    let isListening = false;
+    let jarvisLoop = true;
+    let jarvisActive = false;
+    const synth = window.speechSynthesis;
+    let currentUtterance = null;
+
+    // 🔊 Programmatic Web Audio Synthesizer (No Audio Files Required)
+    const jarvisAudio = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      beep(freq, duration, type = 'sine', volume = 0.08) {
+        this.init();
+        try {
+          if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          
+          gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn("Web Audio sweep failed:", e);
+        }
+      },
+      playActivate() {
+        this.beep(523.25, 0.12, 'sine', 0.12); // C5
+        setTimeout(() => this.beep(659.25, 0.12, 'sine', 0.12), 70); // E5
+        setTimeout(() => this.beep(783.99, 0.35, 'sine', 0.16), 140); // G5
+        setTimeout(() => this.beep(1046.50, 0.5, 'triangle', 0.08), 210); // C6
+      },
+      playDeactivate() {
+        this.beep(880.00, 0.1, 'sine', 0.1);
+        setTimeout(() => this.beep(587.33, 0.15, 'sine', 0.1), 80);
+        setTimeout(() => this.beep(349.23, 0.35, 'sawtooth', 0.05), 160);
+      },
+      playListening() {
+        this.beep(880.00, 0.06, 'sine', 0.06);
+        setTimeout(() => this.beep(1200.00, 0.1, 'sine', 0.08), 40);
+      },
+      playProcessing() {
+        this.beep(300, 0.15, 'sine', 0.05);
+      },
+      playSuccess() {
+        this.beep(987.77, 0.08, 'sine', 0.1);
+        setTimeout(() => this.beep(1318.51, 0.2, 'sine', 0.12), 70);
+      },
+      playError() {
+        this.beep(180, 0.35, 'sawtooth', 0.15);
+      }
+    };
+
+    // 🎨 Holographic Canvas Waveform Visualizer
+    const canvas = document.getElementById('jarvisCanvas');
+    const visualizerCtx = canvas.getContext('2d');
+    let wavePhase = 0;
+    let waveState = 'idle'; // 'idle', 'listening', 'processing', 'speaking'
+    
+    function animateJarvisWave() {
+      requestAnimationFrame(animateJarvisWave);
+      visualizerCtx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerY = height / 2;
+      
+      let lines = 3;
+      let amplitude = 2;
+      let frequency = 0.015;
+      let speed = 0.04;
+      let color = 'rgba(0, 242, 254, ';
+      
+      if (waveState === 'listening') {
+        lines = 4;
+        amplitude = 12 + Math.sin(wavePhase * 5) * 4;
+        frequency = 0.035;
+        speed = 0.14;
+        color = 'rgba(0, 242, 254, ';
+      } else if (waveState === 'processing') {
+        lines = 2;
+        amplitude = 3;
+        frequency = 0.09;
+        speed = 0.22;
+        color = 'rgba(138, 43, 226, ';
+      } else if (waveState === 'speaking') {
+        lines = 4;
+        amplitude = 14 + Math.sin(wavePhase * 3.5) * 7;
+        frequency = 0.024;
+        speed = 0.11;
+        color = 'rgba(57, 229, 140, ';
+      } else { // idle
+        lines = 1;
+        amplitude = 2;
+        frequency = 0.01;
+        speed = 0.02;
+        color = 'rgba(0, 242, 254, ';
+      }
+      
+      for (let i = 0; i < lines; i++) {
+        visualizerCtx.beginPath();
+        visualizerCtx.lineWidth = i === 0 ? 3.5 : 1;
+        const opacity = i === 0 ? '0.85' : (0.35 - i * 0.1).toFixed(2);
+        visualizerCtx.strokeStyle = color + opacity + ')';
+        
+        const phaseShift = wavePhase + i * Math.PI / 4;
+        
+        visualizerCtx.moveTo(0, centerY);
+        for (let x = 0; x < width; x++) {
+          const envelope = Math.sin((x / width) * Math.PI); // Fades waves at edges beautifully
+          const y = centerY + Math.sin(x * frequency - phaseShift) * amplitude * envelope;
+          visualizerCtx.lineTo(x, y);
+        }
+        visualizerCtx.stroke();
+      }
+      
+      wavePhase += speed;
+    }
+    
+    // Arrancar Visualizador
+    animateJarvisWave();
+
+    // Inicializar Speech Recognition
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'es-ES';
+
+      recognition.onstart = () => {
+        isListening = true;
+        waveState = 'listening';
+        setJarvisState('listening', 'Escuchando...');
+        jarvisAudio.playListening();
+        document.getElementById('jarvisCoreIcon').className = 'fa-solid fa-microphone';
+      };
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        document.getElementById('jarvisTranscription').innerHTML = `Tú: "<strong>${escapeHTML(text)}</strong>"`;
+        
+        // 🛠️ ANALIZADOR DE COMANDOS POR VOZ TIPO TERMINAL
+        const cleanText = text.toLowerCase().trim();
+        
+        if (cleanText.includes("borrar memoria") || cleanText.includes("limpiar conversación") || cleanText.includes("reiniciar conversación")) {
+          executeVoiceClearMemory();
+        } else if (cleanText.includes("buscar en la net sobre") || cleanText.includes("buscar en internet sobre") || cleanText.includes("busca en la red")) {
+          document.getElementById('chkWebSearch').checked = true;
+          let query = text.replace(/buscar en la net sobre|buscar en internet sobre|busca en la red/i, "").trim();
+          processJarvisQuery(query);
+        } else if (cleanText.includes("estado del sistema") || cleanText.includes("cómo estás") || cleanText.includes("reporte del sistema")) {
+          executeVoiceSystemReport();
+        } else {
+          processJarvisQuery(text);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech Recognition Error:", event.error);
+        if (event.error === 'no-speech') {
+          waveState = 'idle';
+          setJarvisState('idle', 'EN ESPERA');
+          if (jarvisLoop && jarvisActive) {
+            setTimeout(startJarvisListening, 700);
+          }
+        } else if (event.error === 'network') {
+          jarvisAudio.playError();
+          waveState = 'idle';
+          setJarvisState('idle', 'S.O. LIMITADO (Usa Chat)');
+          document.getElementById('jarvisTranscription').innerHTML = `
+            <span style="color: var(--color-error)">
+              ⚠️ <strong>Servicio de Voz no Disponible (S.O. Liviano):</strong> El navegador no puede conectar con el servidor de reconocimiento. 
+              Al estar en un sistema operativo temporal o muy liviano, el servicio de voz de Windows/Chrome está inactivo. 
+              ¡Por favor, interactúa directamente a través del chat de texto!
+            </span>
+          `;
+          speak("Señor, detecto que el servicio de voz del navegador está inactivo en este sistema operativo liviano. Por favor, utilice el chat de texto.");
+          jarvisLoop = false;
+          const btn = document.getElementById('btnJarvisLoop');
+          if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-circle-minus"></i> Bucle Continuo: OFF';
+            btn.style.color = 'var(--text-muted)';
+            btn.style.borderColor = 'var(--border-glow)';
+          }
+        } else {
+          jarvisAudio.playError();
+          waveState = 'idle';
+          setJarvisState('idle', `ERROR: ${event.error.toUpperCase()}`);
+          if (jarvisLoop && jarvisActive) {
+            setTimeout(startJarvisListening, 2000);
+          }
+        }
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        const overlay = document.getElementById('jarvisOverlay');
+        if (overlay.classList.contains('listening')) {
+          waveState = 'idle';
+          setJarvisState('idle', 'EN ESPERA');
+        }
+      };
+    } else {
+      console.warn("Speech Recognition API no soportada en este navegador.");
+    }
+
+    async function updateJarvisHUD() {
+      if (!isConnected) return;
+      try {
+        const response = await fetch(`${BACKEND_URL}/stats`);
+        if (response.ok) {
+          const stats = await response.json();
+          document.getElementById('jarvisHUDDocs').textContent = stats.knowledge_docs;
+          document.getElementById('jarvisHUDMem').textContent = stats.memory_turns;
+        }
+      } catch(e) {}
+    }
+
+    function activateJarvis() {
+      jarvisActive = true;
+      jarvisAudio.playActivate();
+      updateJarvisHUD();
+      
+      const overlay = document.getElementById('jarvisOverlay');
+      overlay.classList.add('active');
+      waveState = 'idle';
+      setJarvisState('idle', 'SISTEMA COMPILADO');
+      
+      // Saludo inicial
+      speak("Sistema W.D. activado. Interfaces holográficas en línea, señor. Listo para asistirle con conexión a internet en tiempo real.");
+    }
+
+    function deactivateJarvis() {
+      jarvisActive = false;
+      jarvisAudio.playDeactivate();
+      if (recognition && isListening) {
+        recognition.abort();
+      }
+      if (synth) {
+        synth.cancel();
+      }
+      waveState = 'idle';
+      const overlay = document.getElementById('jarvisOverlay');
+      overlay.classList.remove('active');
+      overlay.className = 'jarvis-overlay';
+    }
+
+    function setJarvisState(state, text) {
+      const overlay = document.getElementById('jarvisOverlay');
+      const statusLabel = document.getElementById('jarvisStatus');
+      
+      overlay.classList.remove('listening', 'processing', 'speaking');
+      
+      if (state !== 'idle') {
+        overlay.classList.add(state);
+      }
+      statusLabel.textContent = text;
+    }
+
+    function startJarvisListening() {
+      if (!recognition) {
+        alert("El reconocimiento de voz no es soportado por tu navegador. Usa Chrome o Edge para mejores resultados.");
+        return;
+      }
+      if (isListening) return;
+      if (synth && synth.speaking) {
+        synth.cancel(); 
+      }
+      try {
+        recognition.start();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function toggleJarvisLoop() {
+      jarvisLoop = !jarvisLoop;
+      const btn = document.getElementById('btnJarvisLoop');
+      if (jarvisLoop) {
+        btn.innerHTML = '<i class="fa-solid fa-arrows-spin"></i> Bucle Continuo: ON';
+        btn.style.color = 'var(--color-success)';
+        btn.style.borderColor = 'rgba(57, 229, 140, 0.25)';
+        if (!isListening && (!synth || !synth.speaking)) {
+          startJarvisListening();
+        }
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-circle-minus"></i> Bucle Continuo: OFF';
+        btn.style.color = 'var(--text-muted)';
+        btn.style.borderColor = 'var(--border-glow)';
+      }
+    }
+
+    // 🛠️ Ejecución de comandos especiales por voz
+    async function executeVoiceClearMemory() {
+      waveState = 'processing';
+      setJarvisState('processing', 'Purgando memoria...');
+      jarvisAudio.playDeactivate();
+      try {
+        const response = await fetch(`${BACKEND_URL}/memory`, { method: 'DELETE' });
+        if (response.ok) {
+          speak("Comprendido, señor. Memoria activa purgada y registros limpios. He reiniciado la sesión.");
+          document.getElementById('jarvisTranscription').innerHTML = `Sistema W.D.: <strong>Memoria de conversación restablecida.</strong>`;
+          updateStats();
+          updateJarvisHUD();
+        } else {
+          speak("Lo lamento, hubo un error de acceso al purgar la base de datos.");
+          waveState = 'idle';
+          setJarvisState('idle', 'EN ESPERA');
+        }
+      } catch (e) {
+        speak("Error de red al intentar purgar los archivos.");
+        waveState = 'idle';
+        setJarvisState('idle', 'EN ESPERA');
+      }
+    }
+
+    async function executeVoiceSystemReport() {
+      waveState = 'processing';
+      setJarvisState('processing', 'Módulos en línea...');
+      jarvisAudio.playProcessing();
+      try {
+        const response = await fetch(`${BACKEND_URL}/stats`);
+        if (response.ok) {
+          const stats = await response.json();
+          const docs = stats.knowledge_docs;
+          const memories = stats.memory_turns;
+          const notes = stats.self_notes;
+          
+          const textSpeech = `Sistemas cognitivos al cien por ciento, señor. Tengo indexados ${docs} fragmentos de información en la red vectorial de RAG. Cuento con ${memories} turnos de diálogo en el buffer de memoria episódica, y ${notes} auto-reflexiones registradas en mi núcleo lógico.`;
+          speak(textSpeech);
+          document.getElementById('jarvisTranscription').innerHTML = `Reporte: <strong>RAG: ${docs} pasajes | Memoria: ${memories} turnos | Notas: ${notes}</strong>`;
+          updateJarvisHUD();
+        } else {
+          speak("No se pudo compilar el estado de los módulos de estadísticas.");
+          waveState = 'idle';
+          setJarvisState('idle', 'EN ESPERA');
+        }
+      } catch (e) {
+        speak("Error de enlace al solicitar el reporte del servidor.");
+        waveState = 'idle';
+        setJarvisState('idle', 'EN ESPERA');
+      }
+    }
+
+    function changeJarvisPersonality() {
+      const val = document.getElementById('selJarvisVoice').value;
+      const overlayVal = document.getElementById('selJarvisVoiceOverlay');
+      if (overlayVal) overlayVal.value = val;
+      
+      // Reproducir sonido característico
+      if (val === 'friday') {
+        jarvisAudio.beep(880.00, 0.08, 'sine', 0.08);
+        setTimeout(() => jarvisAudio.beep(1200.00, 0.12, 'sine', 0.08), 50);
+      } else if (val === 'tars') {
+        jarvisAudio.beep(150, 0.35, 'sawtooth', 0.08);
+      } else if (val === 'glados') {
+        jarvisAudio.beep(1000, 0.15, 'triangle', 0.06);
+        setTimeout(() => jarvisAudio.beep(900, 0.15, 'triangle', 0.06), 100);
+      } else { // wd
+        jarvisAudio.playActivate();
+      }
+    }
+
+    function speak(text) {
+      if (!synth) return;
+      synth.cancel();
+      
+      const personality = document.getElementById('selJarvisVoice').value;
+
+      // Limpiar formatos markdown pesados y enlaces para evitar distorsiones de voz
+      let cleanText = text
+        .replace(/```[\s\S]*?```/g, '[Código omitido]')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '') // Quitar imágenes del sintetizador de voz
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+        .replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '')
+        .replace(/fuentes consultadas[\s\S]*/gi, '')
+        .replace(/enlaces de interés[\s\S]*/gi, '')
+        .trim();
+        
+      if (!cleanText) {
+        if (personality === 'friday') {
+          cleanText = "Procesamiento al cien por ciento, Boss.";
+        } else if (personality === 'tars') {
+          cleanText = "Proceso completo, compañero. El humor sigue configurado al noventa por ciento.";
+        } else if (personality === 'glados') {
+          cleanText = "El proceso ha sido completado. Las galletas de premio han sido enviadas al incinerador.";
+        } else {
+          cleanText = "Procesamiento completado, señor.";
+        }
+      }
+      
+      currentUtterance = new SpeechSynthesisUtterance(cleanText);
+      currentUtterance.lang = 'es-ES';
+      
+      const voices = synth.getVoices();
+      let selectedVoice = null;
+
+      // Intentar buscar voz idónea por género si es Friday o G.L.A.D.O.S.
+      if (personality === 'friday' || personality === 'glados') {
+        selectedVoice = voices.find(v => 
+          (v.lang.includes('es') || v.lang.includes('ES')) && 
+          (v.name.toLowerCase().includes('sandra') || 
+           v.name.toLowerCase().includes('sabina') || 
+           v.name.toLowerCase().includes('female') || 
+           v.name.toLowerCase().includes('mujer') || 
+           v.name.toLowerCase().includes('google español'))
+        );
+      }
+      
+      if (!selectedVoice) {
+        selectedVoice = voices.find(v => v.lang.includes('es-ES') || v.lang.includes('es_ES') || v.lang.startsWith('es'));
+      }
+      
+      if (selectedVoice) {
+        currentUtterance.voice = selectedVoice;
+      }
+      
+      // Ajustar dinámicamente Pitch y Speed
+      if (personality === 'friday') {
+        currentUtterance.pitch = 1.15;
+        currentUtterance.rate = 1.05;
+      } else if (personality === 'tars') {
+        currentUtterance.pitch = 0.75;
+        currentUtterance.rate = 0.95;
+      } else if (personality === 'glados') {
+        currentUtterance.pitch = 1.35;
+        currentUtterance.rate = 0.98;
+      } else { // wd (Jarvis)
+        currentUtterance.pitch = 0.92;
+        currentUtterance.rate = 0.95;
+      }
+      
+      currentUtterance.onstart = () => {
+        waveState = 'speaking';
+        setJarvisState('speaking', 'Hablando...');
+        document.getElementById('jarvisCoreIcon').className = 'fa-solid fa-volume-high';
+      };
+      
+      currentUtterance.onend = () => {
+        waveState = 'idle';
+        setJarvisState('idle', 'EN ESPERA');
+        document.getElementById('jarvisCoreIcon').className = 'fa-solid fa-microphone';
+        if (jarvisLoop && jarvisActive) {
+          setTimeout(startJarvisListening, 450);
+        }
+      };
+      
+      synth.speak(currentUtterance);
+    }
+
+    async function processJarvisQuery(queryText) {
+      if (!isConnected) {
+        speak("Lo siento señor, no detecto conexión con el servidor central.");
+        return;
+      }
+      
+      waveState = 'processing';
+      setJarvisState('processing', 'Consultando...');
+      jarvisAudio.playProcessing();
+      document.getElementById('jarvisCoreIcon').className = 'fa-solid fa-circle-notch fa-spin';
+      
+      try {
+        const autoImprove = document.getElementById('chkAutoImprove').checked;
+        const webSearch = document.getElementById('chkWebSearch').checked;
+        const maxLinks = parseInt(document.getElementById('rngMaxLinks').value, 10);
+        const responseStyle = document.getElementById('selResponseStyle').value;
+        const cognitiveDepth = document.getElementById('chkCognitiveDepth').checked ? 'high' : 'standard';
+        const jarvisPersonality = document.getElementById('selJarvisVoice').value;
+        
+        // Agregar a la pantalla del chat principal
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.remove();
+        appendMessage('user', queryText);
+        
+        const response = await fetch(`${BACKEND_URL}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: queryText, 
+            auto_improve: autoImprove, 
+            web_search: webSearch,
+            max_links: maxLinks,
+            response_style: responseStyle,
+            cognitive_depth: cognitiveDepth,
+            jarvis_personality: jarvisPersonality
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          appendMessage('assistant', data.answer);
+          updateStats();
+          updateReflections();
+          updateJarvisHUD();
+          jarvisAudio.playSuccess();
+          
+          let preview = data.answer.length > 150 ? data.answer.substring(0, 150) + "..." : data.answer;
+          document.getElementById('jarvisTranscription').innerHTML = `W.D.: "<strong>${escapeHTML(preview)}</strong>"`;
+          speak(data.answer);
+        } else {
+          jarvisAudio.playError();
+          speak("Error en el servidor al generar una respuesta.");
+          waveState = 'idle';
+          setJarvisState('idle', 'EN ESPERA');
+          if (jarvisLoop && jarvisActive) {
+            setTimeout(startJarvisListening, 1000);
+          }
+        }
+      } catch (e) {
+        console.error("Jarvis fetch error:", e);
+        jarvisAudio.playError();
+        speak("Error de red al consultar el cerebro.");
+        waveState = 'idle';
+        setJarvisState('idle', 'EN ESPERA');
+        if (jarvisLoop && jarvisActive) {
+          setTimeout(startJarvisListening, 1000);
+        }
+      }
+    }
+  </script>
 </body>
 </html>

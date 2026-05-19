@@ -14,6 +14,15 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
+
+# 🌐 Configurar consola de Windows para soportar UTF-8 y evitar caídas por emojis (UnicodeEncodeError)
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='backslashreplace')
+    except Exception:
+        pass
+
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -67,6 +76,11 @@ except Exception as e:
 class ChatRequest(BaseModel):
     message: str
     auto_improve: Optional[bool] = True
+    web_search: Optional[bool] = False
+    max_links: Optional[int] = 5
+    response_style: Optional[str] = "standard"  # standard, short, long, code, creative
+    cognitive_depth: Optional[str] = "standard"  # standard, high
+    jarvis_personality: Optional[str] = "wd"  # wd, friday, tars, glados
 
 class ChatResponse(BaseModel):
     answer: str
@@ -94,7 +108,7 @@ def read_root():
 def chat_endpoint(request: ChatRequest):
     """
     Envía una pregunta a OMNI-AI.
-    Utiliza el RAG vectorial, historial persistente y auto-notas para responder.
+    Utiliza el RAG vectorial, historial persistente, búsqueda en la web y auto-notas para responder.
     """
     global ai
     if ai is None:
@@ -112,7 +126,15 @@ def chat_endpoint(request: ChatRequest):
             )
 
     try:
-        answer = ai.chat(request.message, auto_improve=request.auto_improve)
+        answer = ai.chat(
+            user_message=request.message,
+            auto_improve=request.auto_improve,
+            web_search=request.web_search,
+            max_links=request.max_links,
+            response_style=request.response_style,
+            cognitive_depth=request.cognitive_depth,
+            jarvis_personality=request.jarvis_personality
+        )
         return ChatResponse(
             answer=answer,
             session_id=ai.session_id,
